@@ -28,11 +28,23 @@ class stringReplace extends Command
         $template = $this->argument('template');
         $arguments = $this->argument('arguments');
 
-        foreach ($arguments as $index => $value) {
-            $placeholder = '{' . $index . '}';
-            $template = str_replace($placeholder, $value, $template);
+        preg_match_all('/\{(\d+)\}/', $template, $matches);
+        $placeholders = $matches[1];
+        $indicesMissing = [];
+
+        foreach ($placeholders as $index) {
+            if (!array_key_exists($index, $arguments)) {
+                $indicesMissing[] = $index;
+            } else {
+                $placeholder = '{' . $index . '}';
+                $template = str_replace($placeholder, $arguments[$index], $template);
+            }
         }
-        
-        $this->info($template);
+
+        if (!empty($indicesMissing)) {
+            $this->warn("Missing arguments for placeholders: {" . implode('}, {', $indicesMissing) . "}");
+        } else {
+            $this->info($template);
+        }
     }
 }
