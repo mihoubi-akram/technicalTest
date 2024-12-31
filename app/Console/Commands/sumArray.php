@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 class sumArray extends Command
 {
@@ -26,7 +27,13 @@ class sumArray extends Command
     public function handle()
     {
         $arrayInput = $this->argument('array');
-        $array = eval('return ' . $arrayInput . ';');
+        $array = json_decode($arrayInput, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error('Error : Invalid JSON input');
+            return 1;
+        }
+
         if (!is_array($array)) {
             $this->error('Error : format invalide format');
             return 1;
